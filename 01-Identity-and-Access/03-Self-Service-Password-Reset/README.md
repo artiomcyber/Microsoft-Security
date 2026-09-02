@@ -12,21 +12,22 @@
 
 In this lab, I configured **Self-Service Password Reset (SSPR)** in Microsoft Entra ID.
 
-SSPR allows users to reset their own passwords after successfully verifying their identity, reducing dependence on the IT help desk while maintaining authentication controls.
+SSPR allows users to reset their own passwords after verifying their identity, reducing dependency on the IT help desk while maintaining identity-verification controls.
 
-The Microsoft training exercise was based on an older Entra interface. My tenant uses the newer authentication-method management model, so I adapted the exercise to the current Microsoft Entra configuration while preserving the intended learning objectives.
+The original Microsoft training exercise uses an older Microsoft Entra configuration experience. My tenant uses the current authentication-method management model, so I adapted the exercise to the modern Microsoft Entra interface while preserving the original security objectives.
 
-The final implementation included:
+The implementation included:
 
+- Reviewing the original SSPR state
 - Enabling SSPR for a controlled pilot group
-- Using the existing `Project23` group
-- Reviewing modern authentication methods
-- Avoiding deprecated Security Questions
-- Requiring users to register authentication information
-- Setting authentication-information reconfirmation to 90 days
-- Enabling password-reset notifications
-- Enabling administrator-reset notifications
-- Reviewing the difference between legacy and modern authentication-method configuration
+- Reusing the existing `Project23` group
+- Reviewing SSPR authentication requirements
+- Reviewing the modern centralized Authentication Methods policy
+- Avoiding Security Questions because Microsoft is retiring them
+- Requiring authentication-method registration
+- Changing authentication-information reconfirmation from 180 to 90 days
+- Enabling user password-reset notifications
+- Enabling administrator password-reset notifications
 
 ---
 
@@ -36,19 +37,19 @@ The objectives of this lab were to:
 
 - Enable Self-Service Password Reset.
 - Scope SSPR to a selected group.
-- Review authentication methods available for password reset.
+- Review authentication methods available for password recovery.
+- Understand the difference between the legacy SSPR configuration and the current Authentication Methods policy.
 - Configure user registration requirements.
 - Configure authentication-information reconfirmation.
 - Configure password-reset notifications.
-- Understand the modern Microsoft Entra Authentication Methods policy.
-- Avoid outdated authentication methods where more modern alternatives are available.
-- Verify the completed SSPR configuration.
+- Apply the Microsoft lab requirements using the current Entra interface.
+- Verify the completed configuration.
 
 ---
 
 # Task 1 — Review the Existing SSPR Configuration
 
-I first opened:
+I first navigated to:
 
 ```text
 Microsoft Entra admin center
@@ -60,47 +61,49 @@ Password reset
 Properties
 ```
 
-The original tenant configuration showed:
+The original configuration showed:
 
 ```text
 Self service password reset enabled = None
 ```
 
-![Initial SSPR configuration](Password%20reset%281%29.png)
+![Initial SSPR configuration](Password%20reset.png)
 
-This meant that normal users were not yet enabled for Self-Service Password Reset.
+This meant that regular end users were not currently enabled for Self-Service Password Reset.
+
+This provided a baseline before making any changes.
 
 ---
 
 # Task 2 — Enable SSPR for a Pilot Group
 
-Instead of immediately enabling SSPR for the entire tenant, I selected:
+Rather than immediately enabling SSPR for every user in the tenant, I selected:
 
 ```text
 Self service password reset enabled = Selected
 ```
 
-and chose:
+I then chose:
 
 ```text
 Project23
 ```
 
-as the target group.
+as the pilot group.
 
-![SSPR enabled for Project23](Password%20reset%20assigned%20group%281%29.png)
+![SSPR enabled for Project23](Password%20reset%20assigned%20group.png)
 
-This created a controlled pilot deployment.
+The `Project23` group had already been created during my previous Microsoft Entra Group Management lab.
 
-The `Project23` group had already been created during my previous Microsoft Entra group-management lab, allowing me to reuse an existing group rather than create another temporary group.
+Reusing this group allowed me to connect the labs together and simulate an incremental identity-management implementation.
 
 ---
 
 ## Why Use a Pilot Group?
 
-Enabling a new identity-security feature for a limited group first is safer than immediately applying it to every user.
+Deploying a security capability to a limited group before enabling it tenant-wide is a useful operational practice.
 
-The deployment model becomes:
+A controlled rollout can follow this model:
 
 ```text
 New security capability
@@ -109,56 +112,122 @@ Pilot group
         ↓
 Testing
         ↓
-User feedback
-        ↓
 Troubleshooting
+        ↓
+User feedback
         ↓
 Broader deployment
 ```
 
-This approach reduces operational risk and provides an opportunity to identify configuration problems before organization-wide rollout.
+This reduces the risk of an incorrectly configured policy affecting the entire organization.
+
+For this lab:
+
+```text
+Pilot group = Project23
+```
 
 ---
 
-# Task 3 — Review SSPR Authentication Methods
+# Task 3 — Review Password Reset Authentication Methods
 
-The Microsoft training instructions referenced authentication methods such as:
-
-- Email
-- Mobile phone
-- Mobile app code
-
-However, the current Microsoft Entra portal no longer manages these methods in the same way from the legacy SSPR page.
-
-On the SSPR authentication-method page, the portal displayed:
+I opened:
 
 ```text
-Use the auth methods policy to manage other authentication methods.
+Password reset
+        ↓
+Authentication methods
 ```
 
-It also displayed a notice that:
+The current Entra interface showed:
+
+```text
+Number of methods required to reset = 1
+```
+
+It also showed that **Security Questions** were the only authentication method still directly configurable from this legacy SSPR page.
+
+![Legacy SSPR authentication methods page](PR%20Authentication%20methods.png)
+
+The portal also displayed an important notice:
 
 ```text
 Security Questions are retiring in March 2027.
 ```
 
-![Legacy SSPR authentication methods page](PR%20Authentication%20methods%281%29.png)
+The page additionally stated:
 
-Because the Microsoft lab was based on an older interface, I did not enable Security Questions simply to reproduce an outdated configuration.
+```text
+Use the auth methods policy to manage other authentication methods.
+```
 
-Instead, I followed the current Microsoft Entra authentication-method model.
+This demonstrated that the Microsoft training instructions no longer fully match the current Entra administration experience.
+
+---
+
+# Number of Methods Required to Reset
+
+I kept:
+
+```text
+Number of methods required to reset = 1
+```
+
+This matched the requirement in the Microsoft lab.
+
+Conceptually:
+
+```text
+User forgets password
+        ↓
+Starts SSPR
+        ↓
+Provides one approved verification method
+        ↓
+Identity verified
+        ↓
+Password reset permitted
+```
+
+For more sensitive or higher-risk environments, organizations may choose stronger recovery requirements depending on their security architecture.
+
+---
+
+# Why I Did Not Enable Security Questions
+
+I intentionally left:
+
+```text
+Security Questions = Disabled
+```
+
+The Microsoft Entra portal itself indicated that Security Questions are being retired.
+
+Additionally, security questions have several weaknesses because answers may be:
+
+- Guessable
+- Publicly available
+- Discoverable through social media
+- Reused across services
+- Based on information known by other people
+
+Rather than enabling a method approaching retirement simply to reproduce an older training lab, I kept the modern authentication-method configuration already available in the tenant.
 
 ---
 
 # Task 4 — Review the Modern Authentication Methods Policy
 
-I opened the centralized:
+I followed the link from the SSPR page to the centralized:
 
 ```text
 Authentication Methods Policy
 ```
 
-The tenant showed the following authentication methods:
+The current tenant configuration showed several available authentication methods.
+
+![Modern Authentication Methods policy](Auth%20Methods.png)
+
+The configuration included:
 
 | Authentication Method | Status |
 |---|---|
@@ -174,60 +243,66 @@ The tenant showed the following authentication methods:
 | Verified ID | Disabled |
 | QR code | Disabled |
 
-![Modern Authentication Methods policy](Auth%20Methods.png)
-
-This was an important difference between the current environment and the older Microsoft lab.
-
 ---
 
-# Modernizing the Microsoft Training Exercise
+# Legacy Lab vs Modern Microsoft Entra
 
-Rather than blindly enabling legacy options, I adapted the exercise to the current Microsoft Entra architecture.
+The Microsoft training exercise referenced older SSPR controls such as:
 
-The older training model was conceptually:
+```text
+Email
+Mobile phone
+Mobile app code
+```
+
+In the current environment, most authentication-method administration has moved to the centralized:
+
+```text
+Authentication Methods Policy
+```
+
+The older model was approximately:
 
 ```text
 Password Reset
       ↓
 Authentication Methods
       ↓
-Email
-Mobile phone
-Mobile app code
+Individual SSPR method checkboxes
 ```
 
-The modern model is:
+The current model is more centralized:
 
 ```text
 Microsoft Entra
       ↓
-Authentication Methods Policy
+Authentication Methods
       ↓
-Central management of authentication methods
+Policies
       ↓
-MFA + SSPR + other authentication scenarios
+Central authentication-method management
 ```
 
-This centralized approach makes authentication-method administration more consistent across Microsoft Entra.
+This was one of the most useful lessons in the exercise because it required understanding the **purpose of the configuration** rather than simply following old screenshots.
 
 ---
 
-# Authentication Methods Available in My Tenant
+# Current Authentication Methods in My Tenant
 
-The existing environment already included several stronger authentication capabilities.
+Several modern authentication capabilities were already enabled.
 
-### Microsoft Authenticator
+## Microsoft Authenticator
 
 ```text
 Status = Enabled
 Target = All users
 ```
 
-Microsoft Authenticator can provide stronger authentication than traditional SMS-based verification.
+Microsoft Authenticator provides a stronger modern authentication mechanism than relying only on passwords.
 
 ---
 
-### Software OATH Tokens
+## Software OATH Tokens
 
 ```text
 Status = Enabled
@@ -238,86 +313,48 @@ Software OATH supports time-based one-time passwords generated by compatible aut
 
 ---
 
-### Email OTP
+## Temporary Access Pass
 
 ```text
 Status = Enabled
 Target = All users
 ```
 
-Email OTP was also enabled in the centralized Authentication Methods policy.
+Temporary Access Pass can support controlled onboarding and authentication-method registration scenarios.
 
 ---
 
-### SMS
+## SMS
 
 ```text
 Status = Disabled
 ```
 
-The old training exercise referenced mobile-phone authentication.
+The original training exercise referenced mobile-phone verification.
 
-However, I did not enable SMS solely to reproduce the outdated lab.
-
-For this lab, I preferred to retain the stronger authentication methods already configured in the tenant rather than introduce a weaker method simply because it appeared in older training documentation.
+However, I did not enable SMS simply to reproduce an older lab configuration because stronger modern authentication methods were already available in the tenant.
 
 ---
 
-# Why I Did Not Enable Security Questions
+## Email OTP
 
-The SSPR portal itself displayed a Microsoft notice explaining that **Security Questions are being retired in March 2027**.
-
-For that reason, I deliberately left:
+The Authentication Methods policy also showed:
 
 ```text
-Security Questions = Disabled
+Email OTP = Enabled
 ```
 
-This was a conscious security and lifecycle decision.
+I documented this as part of the authentication-method inventory.
 
-Security questions can depend on information that may be:
+I did not assume that every method displayed in the Authentication Methods policy is automatically usable in every SSPR scenario, because authentication-method applicability depends on the authentication scenario and identity type.
 
-- Guessable
-- Publicly available
-- Discoverable through social media
-- Reused across services
-- Forgotten by legitimate users
-
-Instead, my environment already supported more modern authentication methods.
+This distinction is important when administering Microsoft Entra.
 
 ---
 
-# Task 5 — Configure Number of Methods Required
+# Task 5 — Configure User Registration
 
-On the SSPR Authentication Methods page, I kept:
-
-```text
-Number of methods required to reset = 1
-```
-
-This matched the Microsoft lab requirement.
-
-Conceptually:
-
-```text
-User requests password reset
-        ↓
-Identity verification required
-        ↓
-One approved authentication method
-        ↓
-Successful verification
-        ↓
-Password reset allowed
-```
-
-In a higher-risk production environment, requiring multiple verification methods could be considered depending on the organization's security requirements.
-
----
-
-# Task 6 — Configure User Registration
-
-I then opened:
+I next opened:
 
 ```text
 Password reset
@@ -325,31 +362,36 @@ Password reset
 Registration
 ```
 
-The original registration configuration showed:
+The existing configuration showed:
 
 ```text
 Require users to register when signing in = Yes
+```
+
+and:
+
+```text
 Reconfirm authentication information = 180 days
 ```
 
 ![Original SSPR registration settings](PR%20Registration.png)
 
-The Microsoft lab required users to reconfirm their authentication information every:
+The Microsoft lab required:
 
 ```text
 90 days
 ```
 
-I therefore changed the value from:
+so I changed:
 
 ```text
-180 days
+180
 ```
 
 to:
 
 ```text
-90 days
+90
 ```
 
 and saved the configuration.
@@ -366,33 +408,37 @@ Password reset policy saved
 
 # Why Authentication Registration Matters
 
-SSPR only works effectively when users have valid authentication information registered.
+SSPR depends on users having valid recovery information registered before they lose access.
 
-Without registered authentication methods:
+Without registration:
 
 ```text
-Forgot password
-      ↓
-No identity verification method
-      ↓
-Cannot complete SSPR
+User forgets password
+        ↓
+No registered verification method
+        ↓
+Identity cannot be verified
+        ↓
+SSPR cannot complete
 ```
 
 With proper registration:
 
 ```text
-User registers authentication method
+User signs in
+        ↓
+Registers authentication method
         ↓
 Authentication information stored
         ↓
-Password forgotten
+Password forgotten later
         ↓
 User verifies identity
         ↓
-Password reset
+Password reset completed
 ```
 
-Requiring registration during sign-in helps ensure that users prepare their recovery methods before they actually need them.
+Requiring registration during sign-in helps prepare users before an account-recovery event occurs.
 
 ---
 
@@ -400,26 +446,27 @@ Requiring registration during sign-in helps ensure that users prepare their reco
 
 Authentication information can become outdated.
 
-For example:
+Examples include:
 
 ```text
 Employee changes phone
-Employee replaces device
-Old authenticator removed
-Email address changes
+Employee replaces mobile device
+Authenticator registration changes
+Employee loses access to an old device
+Recovery information becomes outdated
 ```
 
-Periodically asking users to reconfirm their authentication information helps reduce the risk of relying on stale recovery data.
+Periodic reconfirmation helps ensure that recovery information remains valid.
 
 For this lab I configured:
 
 ```text
-Reconfirmation interval = 90 days
+Authentication information reconfirmation = 90 days
 ```
 
 ---
 
-# Task 7 — Configure SSPR Notifications
+# Task 6 — Configure Password Reset Notifications
 
 I then opened:
 
@@ -445,58 +492,87 @@ Notify all admins when other admins reset their password = Yes
 
 ---
 
-# Why Password Reset Notifications Matter
+# Why User Notifications Matter
 
-User notifications provide an additional security signal.
+Password-reset notifications provide users with a security signal when account-recovery activity occurs.
 
-For example:
+Conceptually:
 
 ```text
 Password reset occurs
-       ↓
+        ↓
 User receives notification
-       ↓
+        ↓
 Was this expected?
-       ↓
-Yes → no action required
-No  → possible account compromise
+       / \
+     Yes  No
+     ↓     ↓
+   Normal Possible security incident
 ```
 
-If a user receives a password-reset notification they did not initiate, it can alert them to potentially suspicious activity.
+If a user receives an unexpected password-reset notification, it can indicate suspicious account activity that should be investigated.
 
 ---
 
 # Why Administrator Notifications Matter
 
-Administrator identities have elevated privileges and represent higher-value targets.
+Administrator identities have elevated privileges and represent more sensitive accounts.
 
-I therefore enabled:
+For that reason, I enabled:
 
 ```text
 Notify all admins when another admin resets their password
 ```
 
-This provides additional visibility into privileged-account password changes.
-
 Conceptually:
 
 ```text
 Administrator password reset
-          ↓
+        ↓
 Notification generated
-          ↓
+        ↓
 Other administrators informed
-          ↓
+        ↓
 Unexpected activity can be investigated
 ```
 
-This contributes to better monitoring of privileged identities.
+This provides additional visibility around privileged-account recovery activity.
 
 ---
 
-# Final SSPR Architecture
+# Final SSPR Configuration
 
-My completed lab configuration can be represented as:
+The completed configuration was:
+
+| SSPR Control | Final Configuration |
+|---|---|
+| SSPR enabled | Yes |
+| Scope | Selected |
+| Pilot group | Project23 |
+| Methods required to reset | 1 |
+| Security Questions | Disabled |
+| Registration required when signing in | Yes |
+| Reconfirmation period | 90 days |
+| Notify users after password reset | Yes |
+| Notify admins when admins reset password | Yes |
+
+The modern authentication environment also included:
+
+| Authentication Method | Status |
+|---|---|
+| Microsoft Authenticator | Enabled |
+| Software OATH | Enabled |
+| Passkey (FIDO2) | Enabled |
+| Temporary Access Pass | Enabled |
+| Email OTP | Enabled |
+| SMS | Disabled |
+| Voice call | Disabled |
+
+---
+
+# Final Architecture
+
+The completed lab can be represented as:
 
 ```text
                     Microsoft Entra ID
@@ -504,66 +580,53 @@ My completed lab configuration can be represented as:
                            ▼
                 Self-Service Password Reset
                            │
-                    Selected Users
+                           ▼
+                    Selected users
                            │
                            ▼
                        Project23
                            │
                            ▼
-              Authentication Registration
+              Authentication registration
                            │
                            ▼
-               Modern Authentication Methods
-                           │
-           ┌───────────────┼───────────────┐
-           ▼               ▼               ▼
- Microsoft Authenticator  OATH         Email OTP
+              Authentication verification
                            │
                            ▼
-                 Identity Verification
+                    Password reset
                            │
                            ▼
-                    Password Reset
-                           │
-                           ▼
-                      Notification
+                 Security notifications
+```
+
+The authentication-method layer is managed centrally:
+
+```text
+Microsoft Entra ID
+        ↓
+Authentication Methods Policy
+        ↓
+Microsoft Authenticator
+Passkeys
+OATH
+Temporary Access Pass
+Other supported methods
 ```
 
 ---
 
-# Final Configuration
+# Before vs After
 
-| SSPR Control | Final Configuration |
-|---|---|
-| SSPR scope | Selected users |
-| Pilot group | Project23 |
-| Methods required to reset | 1 |
-| Security Questions | Disabled |
-| Microsoft Authenticator | Enabled |
-| Software OATH | Enabled |
-| Email OTP | Enabled |
-| SMS | Disabled |
-| Registration required | Yes |
-| Reconfirmation period | 90 days |
-| Notify users after reset | Yes |
-| Notify admins of admin resets | Yes |
-
----
-
-# Legacy Lab vs Modern Implementation
-
-One of the most valuable parts of this exercise was identifying that the Microsoft training material was based on an older configuration experience.
-
-| Training Lab | My Current Implementation |
-|---|---|
-| Authentication methods managed under SSPR | Authentication Methods policy |
-| Email | Email OTP policy |
-| Mobile app code | Authenticator / OATH |
-| Mobile phone | SMS available but intentionally not enabled |
-| Security Questions available | Not enabled; retiring |
-| Direct legacy method configuration | Centralized authentication-method management |
-
-This required understanding the **security objective** rather than simply reproducing each button shown in old training screenshots.
+| Setting | Before | After |
+|---|---|---|
+| SSPR enabled | None | **Selected** |
+| SSPR group | None | **Project23** |
+| Methods required | 1 | **1** |
+| Security Questions | Disabled | **Disabled** |
+| Registration required | Yes | **Yes** |
+| Reconfirmation | 180 days | **90 days** |
+| User reset notification | Not configured for lab | **Enabled** |
+| Admin reset notification | Not configured for lab | **Enabled** |
 
 ---
 
@@ -573,35 +636,34 @@ By completing this lab, I practiced:
 
 - Microsoft Entra ID administration
 - Self-Service Password Reset
-- Authentication-method management
-- Authentication registration
-- Identity verification
-- Password recovery
-- Group-scoped security deployment
-- Pilot deployments
+- Identity recovery
+- Authentication-method registration
+- Authentication Methods policy
+- Pilot security deployments
+- Group-scoped configuration
 - Microsoft Authenticator
 - Software OATH
-- Email OTP
-- Security-question lifecycle awareness
+- Temporary Access Pass awareness
+- Passkey awareness
 - Password-reset notifications
 - Privileged-account monitoring
-- Modern authentication architecture
-- Legacy-to-modern configuration migration
+- Legacy-to-modern Microsoft Entra configuration
+- Identity lifecycle management
 
 ---
 
 # Security and Operational Observations
 
-## 1. SSPR reduces help-desk dependency
+## 1. SSPR Reduces Help-Desk Dependency
 
-Without SSPR:
+Traditional password recovery may require:
 
 ```text
 User forgets password
         ↓
 Help-desk ticket
         ↓
-Administrator verifies user
+Administrator verifies identity
         ↓
 Administrator resets password
 ```
@@ -616,35 +678,41 @@ User verifies identity
 User resets password
 ```
 
-This can reduce support workload while allowing users to recover access more quickly.
+This can reduce support workload and improve recovery speed.
 
 ---
 
-## 2. SSPR is an IAM control, not only a convenience feature
+## 2. SSPR Is a Security Control, Not Only a Convenience Feature
 
-The reset process must verify that the person requesting the reset is actually the legitimate account owner.
+Password recovery is effectively another authentication process.
+
+The system must answer:
+
+> Is the person requesting the password reset really the legitimate account owner?
 
 Therefore:
 
 ```text
-Password reset
-     ≠
-Simply choosing a new password
+Password Reset
+      =
+Identity Verification
+      +
+Credential Recovery
 ```
 
-It is an identity-verification process.
+Weak recovery controls could undermine otherwise strong authentication.
 
 ---
 
-## 3. Strong recovery methods matter
+## 3. Recovery Methods Must Be Protected
 
-A password reset mechanism can become a security weakness if attackers can easily bypass normal authentication through account recovery.
+An organization can deploy strong passwords and MFA, but if the account-recovery process is weak, attackers may attempt to bypass normal authentication through recovery mechanisms.
 
-For this reason, recovery authentication methods must be protected carefully.
+Therefore, SSPR design is part of the broader identity-security architecture.
 
 ---
 
-## 4. Pilot deployment reduces operational risk
+## 4. Pilot Deployment Reduces Operational Risk
 
 I enabled SSPR only for:
 
@@ -652,36 +720,73 @@ I enabled SSPR only for:
 Project23
 ```
 
-rather than immediately enabling it for the entire tenant.
+rather than immediately enabling it tenant-wide.
 
-This allows:
+This allowed the configuration to be treated as a controlled pilot.
 
-- Testing
-- Troubleshooting
-- User feedback
-- Policy validation
+A production deployment could follow:
 
-before wider deployment.
-
----
-
-## 5. Avoid implementing obsolete controls just to match training
-
-The Microsoft lab referenced an older authentication-method configuration.
-
-Instead of deliberately reintroducing older methods, I used the current Entra architecture.
-
-This reflects a practical administrative principle:
-
-> Understand the purpose of the control and implement it using the current supported platform design.
+```text
+Pilot
+  ↓
+Test
+  ↓
+Monitor
+  ↓
+Resolve problems
+  ↓
+Expand
+```
 
 ---
 
-## 6. Notifications improve visibility
+## 5. Authentication Methods Are Becoming More Centralized
 
-Password-reset notifications can help users and administrators detect unexpected password-management activity.
+The training lab expected several options to appear directly inside the SSPR authentication-method page.
 
-They provide an additional monitoring layer around identity recovery.
+My current tenant instead directed me to:
+
+```text
+Authentication Methods Policy
+```
+
+This showed how Microsoft Entra administration continues to evolve.
+
+Administrators therefore need to understand the security objective instead of relying purely on memorized portal navigation.
+
+---
+
+## 6. Avoid Reintroducing Retiring Controls
+
+Security Questions were available on the legacy SSPR page, but the portal explicitly stated that they are retiring.
+
+I therefore left them disabled.
+
+This demonstrates an important operational principle:
+
+> Training material should be interpreted in the context of the current supported platform.
+
+---
+
+## 7. Notifications Provide Detection Capability
+
+SSPR is not only about prevention and recovery.
+
+Notifications provide an additional detection layer:
+
+```text
+Password reset
+        ↓
+Notification
+        ↓
+User/Admin visibility
+        ↓
+Unexpected activity detected
+        ↓
+Investigation
+```
+
+This supports better identity monitoring.
 
 ---
 
@@ -689,27 +794,29 @@ They provide an additional monitoring layer around identity recovery.
 
 For a real production deployment, I would consider:
 
-- Expanding SSPR gradually after successful pilot testing.
-- Requiring stronger authentication methods.
-- Reviewing authentication-method registration coverage.
-- Monitoring SSPR usage and failures.
-- Monitoring password-reset audit logs.
-- Reviewing privileged-account password resets.
-- Requiring additional verification for higher-risk identities where appropriate.
-- Using Conditional Access together with modern authentication.
+- Maintaining SSPR as a pilot before tenant-wide rollout.
+- Measuring authentication-method registration coverage.
+- Reviewing SSPR audit logs.
+- Monitoring failed password-reset attempts.
+- Monitoring unusual recovery activity.
+- Reviewing privileged-account reset events.
+- Ensuring users have reliable recovery methods.
+- Using stronger phishing-resistant authentication methods where appropriate.
 - Expanding passwordless authentication.
-- Using Temporary Access Pass for controlled onboarding scenarios.
-- Reviewing authentication-method policies regularly.
-- Removing weak or obsolete authentication methods.
+- Using Temporary Access Pass for controlled onboarding.
+- Reviewing Authentication Methods policies periodically.
+- Removing obsolete authentication methods.
+- Applying Conditional Access.
+- Combining SSPR with MFA.
 - Implementing stronger privileged identity controls.
 
 ---
 
 # Connection to Previous Labs
 
-This lab continues the identity-security environment I have been building.
+This lab builds on the earlier identity-security exercises in my Microsoft Security lab environment.
 
-### Lab 01 — Group Management
+## Lab 01 — Basic Group Management
 
 ```text
 Users
@@ -717,23 +824,24 @@ Groups
 Dynamic membership
 External identities
 Group ownership
-Licensing
+Group-based licensing
 ```
 
-### Lab 02 — Password Protection
+## Lab 02 — Password Protection
 
 ```text
 Smart Lockout
-Banned passwords
-Authentication protection
+Custom banned passwords
+Password protection
+Authentication security
 ```
 
-### Lab 03 — Self-Service Password Reset
+## Lab 03 — Self-Service Password Reset
 
 ```text
 Password recovery
 Authentication registration
-Recovery verification
+Identity verification
 Notifications
 ```
 
@@ -744,10 +852,38 @@ Identity Administration
         +
 Password Protection
         +
-Secure Password Recovery
+Secure Account Recovery
         =
-Stronger Identity Lifecycle
+Stronger Identity Lifecycle Security
 ```
+
+---
+
+# Key Lesson: Understanding the Objective Instead of Memorizing Buttons
+
+One of the most valuable lessons from this exercise was that the Microsoft training instructions did not exactly match the current Entra interface.
+
+Instead of treating this as a blocker, I identified the purpose of the original configuration and located the current equivalent controls.
+
+The process became:
+
+```text
+Understand requirement
+        ↓
+Identify current Microsoft implementation
+        ↓
+Evaluate security implications
+        ↓
+Configure
+        ↓
+Save
+        ↓
+Verify
+        ↓
+Document
+```
+
+This is closer to real-world administration than simply reproducing screenshots from a tutorial.
 
 ---
 
@@ -757,30 +893,27 @@ Stronger Identity Lifecycle
 
 I successfully:
 
-- Reviewed the initial SSPR configuration.
-- Enabled Self-Service Password Reset.
-- Scoped SSPR to the `Project23` pilot group.
-- Reviewed the legacy SSPR authentication-method interface.
-- Identified that Microsoft has moved authentication methods to the centralized Authentication Methods policy.
-- Reviewed the modern authentication methods enabled in my tenant.
-- Kept Microsoft Authenticator enabled.
-- Kept Software OATH enabled.
-- Kept Email OTP enabled.
-- Intentionally did not enable SMS simply to reproduce an outdated training exercise.
-- Did not enable Security Questions because Microsoft is retiring the feature.
-- Configured one authentication method as required for password reset.
+- Reviewed the original Self-Service Password Reset configuration.
+- Identified that SSPR was initially disabled for end users.
+- Enabled SSPR for a selected pilot group.
+- Selected the existing `Project23` group.
+- Reviewed the password-reset authentication requirements.
+- Kept one authentication method required for reset as specified by the lab.
+- Reviewed Microsoft's modern Authentication Methods policy.
+- Identified that the current interface differs from the older Microsoft training environment.
+- Reviewed Microsoft Authenticator, Passkeys, OATH, Temporary Access Pass, Email OTP, SMS and other authentication methods.
+- Intentionally left Security Questions disabled because the feature is being retired.
+- Kept the existing stronger modern authentication configuration rather than enabling SMS only to reproduce an older lab.
 - Required authentication-method registration during sign-in.
-- Changed authentication-information reconfirmation from 180 to 90 days.
+- Changed authentication-information reconfirmation from 180 days to 90 days.
 - Enabled user password-reset notifications.
 - Enabled administrator notifications for administrator password resets.
-- Saved and verified the final configuration.
+- Saved and verified the configuration.
 
-The most valuable part of this lab was learning how to translate an **older Microsoft training exercise into the current Microsoft Entra architecture** while preserving the security objective.
-
-Rather than following outdated screenshots mechanically, I used the modern authentication-method management model and documented why certain legacy options were intentionally not enabled.
+The most valuable part of this lab was learning how to translate an **older Microsoft training exercise into the current Microsoft Entra architecture** while maintaining the intended identity-security objective.
 
 ---
 
 ## Skills Practiced
 
-`Microsoft Entra ID` · `IAM` · `SSPR` · `Self-Service Password Reset` · `Authentication Methods` · `Microsoft Authenticator` · `OATH` · `Email OTP` · `Identity Recovery` · `Password Reset` · `Authentication Registration` · `Privileged Identity Monitoring` · `Microsoft 365 Security` · `Identity Security`
+`Microsoft Entra ID` · `IAM` · `SSPR` · `Self-Service Password Reset` · `Authentication Methods` · `Microsoft Authenticator` · `Passkeys` · `OATH` · `Temporary Access Pass` · `Identity Recovery` · `Password Reset` · `Authentication Registration` · `Pilot Deployment` · `Privileged Identity Monitoring` · `Microsoft 365 Security` · `Identity Security`
