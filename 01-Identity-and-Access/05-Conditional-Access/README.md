@@ -12,17 +12,19 @@
 
 In this lab, I created and tested a Microsoft Entra **Conditional Access** policy.
 
-The goal was to block a specific user from accessing **Microsoft Sway** and then validate the policy with the **What If** analysis tool before enforcement.
+The objective was to block a selected user from accessing **Microsoft Sway** and validate the expected result using the **What If** analysis tool before enforcement.
 
-I adapted the Microsoft lab to my own fictional tenant and used:
+For my fictional `ExposedCybersecurity` tenant, I used:
 
 ```text
+Policy: CA-Block-Sway-ChrisGreen
 User: Chris Green
 Application: Microsoft Sway
-Policy: CA-Block-Sway-ChrisGreen
+Action: Block access
+State: Report-only
 ```
 
-The policy was intentionally kept in **Report-only** mode so it could be tested safely before enforcement.
+The policy remained in **Report-only** mode so I could safely validate its behavior before enforcement.
 
 ---
 
@@ -30,12 +32,12 @@ The policy was intentionally kept in **Report-only** mode so it could be tested 
 
 - Create a Conditional Access policy.
 - Target a specific user.
-- Exclude an administrator account.
+- Exclude an administrator.
 - Target a specific cloud application.
 - Configure **Block access**.
-- Use **Report-only** mode for safe testing.
-- Validate the result using the **What If** tool.
-- Understand how Conditional Access replaces many older identity-security controls.
+- Test the policy in **Report-only** mode.
+- Validate the result with the **What If** tool.
+- Practice safe Conditional Access deployment.
 
 ---
 
@@ -45,32 +47,32 @@ I opened the Microsoft Entra Conditional Access portal.
 
 ![Conditional Access Overview](Conditional%20Access%20%20Overview.png)
 
-Conditional Access allows access decisions to be based on signals such as:
+Conditional Access can evaluate signals such as:
 
 ```text
 User
 Application
 Device
 Location
-Authentication method
+Authentication context
 Session
 ```
 
-This makes it much more flexible than legacy per-user security controls.
+and then make an access decision.
 
 ---
 
 # 2. Create the Policy
 
-I created a new policy named:
+I created a new Conditional Access policy named:
 
 ```text
 CA-Block-Sway-ChrisGreen
 ```
 
-![New Conditional Access policy](Conditional%20Access%20policy%281%29.png)
+![Conditional Access policy](Conditional%20Access%20policy.png)
 
-The naming convention makes the purpose immediately understandable:
+The naming convention clearly describes the purpose:
 
 ```text
 CA
@@ -79,7 +81,7 @@ Conditional Access
 
 Block-Sway
 ↓
-Policy action and target
+Purpose
 
 ChrisGreen
 ↓
@@ -88,7 +90,7 @@ Target user
 
 ---
 
-# 3. Assign the User
+# 3. Include the Target User
 
 I configured the policy to include:
 
@@ -96,21 +98,27 @@ I configured the policy to include:
 Chris Green
 ```
 
-![Conditional Access user included](CA%20User%20included%281%29.png)
+![Conditional Access included user](CA%20User%20included.png)
 
-I also excluded my administrator account:
+The policy therefore evaluates access attempts made by this user.
+
+---
+
+# 4. Exclude the Administrator
+
+I excluded my administrator account:
 
 ```text
 Artsiom Pankrashkin
 ```
 
-![Conditional Access administrator excluded](CA%20User%20excluded%281%29.png)
+![Conditional Access excluded administrator](CA%20User%20excluded.png)
 
-Although the policy already targeted only Chris Green, explicitly reviewing exclusions was useful practice for preventing accidental administrator lockout in broader policies.
+Although this policy targets only Chris Green, practicing administrator exclusions is useful because broader Conditional Access policies can cause accidental administrator lockout if configured incorrectly.
 
 ---
 
-# 4. Select the Target Application
+# 5. Select Microsoft Sway
 
 Under **Target resources**, I selected:
 
@@ -118,13 +126,13 @@ Under **Target resources**, I selected:
 Microsoft Sway
 ```
 
-![Conditional Access Sway target](CA%20Target%20source%20Sway%281%29.png)
+![Microsoft Sway target](CA%20Target%20source%20Sway.png)
 
-The policy therefore applied only when the selected user attempted to access Sway.
+The policy therefore applies when the targeted user attempts to access Microsoft Sway.
 
 ---
 
-# 5. Configure Access Control
+# 6. Configure Block Access
 
 Under **Grant**, I selected:
 
@@ -135,7 +143,7 @@ Block access
 The final policy configuration was:
 
 ```text
-Policy name:
+Policy:
 CA-Block-Sway-ChrisGreen
 
 Include:
@@ -144,7 +152,7 @@ Chris Green
 Exclude:
 Artsiom Pankrashkin
 
-Target:
+Target resource:
 Microsoft Sway
 
 Grant:
@@ -159,19 +167,19 @@ Not configured
 Session:
 Not configured
 
-Policy state:
+State:
 Report-only
 ```
 
-![Final Conditional Access configuration](CA%20Final%281%29.png)
+![Final Conditional Access configuration](CA%20Final.png)
 
 ---
 
-# 6. Create the Policy in Report-Only Mode
+# 7. Create the Policy in Report-Only Mode
 
 After creation, the policy appeared in the Conditional Access policy inventory.
 
-![Conditional Access policies](Conditional%20Access%20%20Policies.png)
+![Conditional Access Policies](Conditional%20Access%20%20Policies.png)
 
 The policy state was:
 
@@ -179,33 +187,31 @@ The policy state was:
 Report-only
 ```
 
-I intentionally did not immediately switch the policy to **On**.
+I intentionally did not enable the policy immediately.
 
-The tenant still had **Security Defaults** enabled, and I did not want to disable the tenant's existing baseline protection merely to enforce this small test policy.
-
-A safer approach is:
+A safer deployment process is:
 
 ```text
-Build policy
+Create policy
      ↓
 Report-only
      ↓
 Test
      ↓
-Review result
+Review
      ↓
-Implement replacement baseline policies
-     ↓
-Enable
+Enable when ready
 ```
+
+This reduces the risk of accidental access disruption or administrator lockout.
 
 ---
 
-# 7. Test with the What If Tool
+# 8. Test the Policy with What If
 
-I used Microsoft Entra's **What If** analysis tool to simulate a sign-in.
+I used the Conditional Access **What If** tool to simulate a sign-in.
 
-The test configuration was:
+The test scenario was:
 
 ```text
 User: Chris Green
@@ -216,32 +222,27 @@ Client app: Browser
 
 ![Conditional Access What If configuration](What%20if%20policies.png)
 
-The modern What If interface required both:
-
-```text
-Device platform
-Client app
-```
-
-so I used a realistic scenario:
+The current What If interface required both a device platform and client application, so I used a realistic:
 
 ```text
 Windows + Browser
 ```
 
+scenario.
+
 ---
 
-# 8. What If Result
+# 9. Validate the Result
 
-The analysis showed that:
+The What If analysis showed that:
 
 ```text
 CA-Block-Sway-ChrisGreen
 ```
 
-**would apply** to the simulated sign-in.
+**would apply**.
 
-The resulting Grant control was:
+The Grant control was:
 
 ```text
 Block access
@@ -249,9 +250,7 @@ Block access
 
 ![Conditional Access What If result](What%20if%20policies%20RUN.png)
 
-This confirmed that the policy logic was working correctly.
-
-The simulated access path was:
+The resulting access logic was:
 
 ```text
 Chris Green
@@ -262,14 +261,31 @@ Browser
       ↓
 Microsoft Sway
       ↓
-Conditional Access evaluates policy
+Conditional Access evaluation
       ↓
 CA-Block-Sway-ChrisGreen
       ↓
 BLOCK ACCESS
 ```
 
-Because the policy remained in **Report-only**, the block was simulated rather than actually enforced.
+Because the policy remained in **Report-only** mode, the result was simulated rather than actively enforced.
+
+---
+
+## Why I Kept the Policy in Report-Only
+
+My tenant still had **Security Defaults** providing baseline protection.
+
+I did not disable Security Defaults simply to activate this single test policy.
+
+Before replacing Security Defaults with Conditional Access, I would first create appropriate baseline policies such as:
+
+- Require MFA.
+- Protect administrator accounts.
+- Block legacy authentication.
+- Require stronger authentication for privileged identities.
+
+This avoids weakening the tenant while moving from Security Defaults to Conditional Access.
 
 ---
 
@@ -280,13 +296,14 @@ Because the policy remained in **Report-only**, the block was simulated rather t
 | Policy | `CA-Block-Sway-ChrisGreen` |
 | Included user | Chris Green |
 | Excluded administrator | Artsiom Pankrashkin |
-| Target resource | Microsoft Sway |
+| Target application | Microsoft Sway |
 | Grant control | **Block access** |
-| Network conditions | Not configured |
+| Network | Not configured |
 | Additional conditions | Not configured |
 | Session controls | Not configured |
 | Policy state | **Report-only** |
-| What If result | **Policy applies / Block access** |
+| What If result | **Policy applies** |
+| Expected result | **Block access** |
 
 ---
 
@@ -294,39 +311,31 @@ Because the policy remained in **Report-only**, the block was simulated rather t
 
 ### Conditional Access is policy-based security
 
-Instead of configuring MFA or access controls individually for each user, Conditional Access can evaluate multiple signals before allowing access.
+Instead of configuring security individually for every account, Conditional Access evaluates identity and contextual information before making an access decision.
 
 ```text
-Identity + Context + Resource
-            ↓
+Identity
+   +
+Resource
+   +
+Context
+   ↓
 Conditional Access
-            ↓
-Allow / Require control / Block
+   ↓
+Allow / Require controls / Block
 ```
-
----
 
 ### Report-only reduces deployment risk
 
-A badly configured Conditional Access policy can potentially lock users or administrators out.
+Conditional Access policies can have significant impact. Testing them before enforcement helps prevent unexpected access problems.
 
-Using Report-only first allows the policy logic to be evaluated before enforcement.
+### Administrator lockout must be considered
 
----
+Incorrect Conditional Access policies can affect privileged accounts, so administrator and emergency-access scenarios should always be considered.
 
-### Administrative exclusions require care
+### What If helps validate policy logic
 
-Emergency-access and administrator exclusions can prevent lockouts, but excessive exclusions can also create security gaps.
-
-They should therefore be limited and documented.
-
----
-
-### Security Defaults and Conditional Access require planning
-
-I did not disable Security Defaults simply to activate this test policy.
-
-The better migration path is to first design replacement Conditional Access baseline policies for controls such as MFA before removing the existing tenant-wide baseline.
+The What If tool allows administrators to simulate whether Conditional Access policies would apply without requiring a real sign-in attempt.
 
 ---
 
@@ -338,19 +347,19 @@ I successfully:
 
 - Created a Conditional Access policy.
 - Used a clear policy naming convention.
-- Targeted Chris Green.
+- Included Chris Green.
 - Excluded my administrator account.
 - Targeted Microsoft Sway.
 - Configured **Block access**.
 - Created the policy in **Report-only** mode.
-- Used the What If tool.
-- Tested a Windows/browser sign-in scenario.
+- Used the What If analysis tool.
+- Tested a Windows + Browser access scenario.
 - Verified that the policy would apply.
-- Verified that the resulting access decision would be **Block access**.
-- Kept the policy safely in Report-only pending a broader Conditional Access baseline design.
+- Verified that the resulting Grant control would be **Block access**.
+- Kept the policy safely in Report-only while Security Defaults remained active.
 
 ---
 
 ## Skills Practiced
 
-`Microsoft Entra ID` · `Conditional Access` · `IAM` · `Access Control` · `What If Analysis` · `Report-Only Policies` · `Cloud App Control` · `Policy Testing` · `Zero Trust` · `Microsoft 365 Security`
+`Microsoft Entra ID` · `Conditional Access` · `IAM` · `Access Control` · `What If Analysis` · `Report-Only Policies` · `Cloud Applications` · `Policy Testing` · `Administrator Protection` · `Zero Trust` · `Microsoft 365 Security`
