@@ -4,34 +4,53 @@
 **Environment:** Microsoft Entra ID + Microsoft 365 Business Premium  
 **Tenant:** ExposedCybersecurity  
 **Date completed:** 2 September 2026  
-**Microsoft lab:** [Exercise — Perform basic Group Management tasks](https://microsoftlearning.github.io/Get-started-Microsoft-Entra-Management-Tasks/Instructions/Labs/02-perform-basic-group-management.html)
-
-## Overview
-
-In this lab I practiced the basic group-management tasks that an IAM or Microsoft 365 administrator performs in Microsoft Entra ID. The exercise covered Microsoft 365 groups, security groups, assigned and dynamic membership, external guest identities, group ownership, and group-based license assignment.
-
-I used my own Microsoft 365 Business Premium lab tenant instead of following the sample tenant exactly. This made the exercise more realistic because I had to adapt the Microsoft instructions to the users, licenses, and interface available in my environment.
-
-## Objectives
-
-The goals of the lab were to:
-
-- Create a Microsoft 365 group with assigned membership.
-- Create a Security group with dynamic user membership.
-- Build a dynamic rule for guest accounts.
-- Add an external guest identity to a Microsoft 365 group.
-- Understand the difference between manual and automatic group membership.
-- Review group ownership.
-- Assign a Microsoft 365 license through group membership.
-- Verify the result from both the group and user side.
+**Microsoft Lab:** [Exercise — Perform basic Group Management tasks](https://microsoftlearning.github.io/Get-started-Microsoft-Entra-Management-Tasks/Instructions/Labs/02-perform-basic-group-management.html)
 
 ---
 
-## Task 1 — Create the `Project23` Microsoft 365 group
+## Overview
 
-I created a new Microsoft 365 group named **Project23**.
+In this lab, I practiced basic group-management tasks that an IAM or Microsoft 365 administrator performs in Microsoft Entra ID.
 
-Configuration:
+The exercise covered:
+
+- Microsoft 365 groups
+- Security groups
+- Assigned membership
+- Dynamic membership
+- External/B2B guest identities
+- Group ownership
+- Group-based license assignment
+- Verification and troubleshooting
+
+I completed the exercise in my own Microsoft 365 Business Premium lab tenant rather than using the exact sample environment shown in the Microsoft instructions.
+
+This made the exercise more realistic because I had to adapt the lab to the users, subscriptions, and current Microsoft administration interface available in my tenant.
+
+---
+
+## Objectives
+
+The objectives of this lab were to:
+
+- Create a Microsoft 365 group with assigned membership.
+- Create a Security group using dynamic membership.
+- Configure a dynamic membership rule for guest users.
+- Invite an external user into Microsoft Entra ID.
+- Add an external guest to a Microsoft 365 group.
+- Compare assigned and dynamic membership.
+- Configure group ownership.
+- Assign a Microsoft 365 license through a group.
+- Verify group membership and licensing from the user side.
+- Troubleshoot differences between the Microsoft training environment and my own tenant.
+
+---
+
+# Task 1 — Create the Project23 Microsoft 365 Group
+
+I created a Microsoft 365 group named **Project23**.
+
+### Configuration
 
 | Setting | Value |
 |---|---|
@@ -40,262 +59,600 @@ Configuration:
 | Membership type | Assigned |
 | Initial member | Sophie Williams |
 
-The important point here is that **Assigned** membership is controlled manually. An administrator or group owner decides which users are members.
+With **Assigned** membership, users are manually added or removed by an administrator or group owner.
 
-A Microsoft 365 group can also be used as the identity layer behind collaboration services such as a shared mailbox, calendar, SharePoint resources, and Microsoft Teams.
+This differs from dynamic groups, where Microsoft Entra automatically determines membership based on attributes.
 
 ### Result
 
-`Project23` was successfully created and appeared in the Entra ID group inventory as a Microsoft 365 group with Assigned membership.
+`Project23` was successfully created and appeared in the Microsoft Entra group inventory as a Microsoft 365 group with **Assigned** membership.
 
-![Groups overview](images/01-groups-overview.png)
+![All groups including Guest Users and Project23](All%20groups%20incl%20Guest%20and%20Project23.png)
+
+The screenshot also shows the other groups already present in my lab environment, including:
+
+- All Company
+- ExposedCybersecurity
+- Guest Users
+- Marketing
+- Northwest Sales
+- Project23
 
 ---
 
-## Task 2 — Create a dynamic Security group for guest users
+# Task 2 — Create a Dynamic Security Group for Guest Users
 
-Next, I created a Security group named **Guest Users**.
+Next, I created a Security group called **Guest Users**.
 
-Configuration:
+### Configuration
 
 | Setting | Value |
 |---|---|
 | Group type | Security |
 | Group name | Guest Users |
 | Membership type | Dynamic User |
-| Dynamic property | userType |
+| Property | userType |
 | Operator | Equals |
 | Value | Guest |
 
-The rule is conceptually:
+The membership rule is conceptually:
 
 ```text
 userType = Guest
 ```
 
-This means I do not manually maintain the membership of this group. Microsoft Entra evaluates user attributes and automatically places any identity with a `Guest` user type into the group.
+This means that I do not need to manually maintain membership in this group.
 
-### Why this matters
+Microsoft Entra evaluates the user attributes and automatically adds identities where:
 
-This is one of the fundamental differences between **assigned** and **dynamic** groups:
+```text
+User type = Guest
+```
 
-- **Assigned group:** membership is explicitly managed by an administrator or owner.
-- **Dynamic group:** membership is calculated automatically from user or device attributes.
+### Assigned vs Dynamic Membership
 
-Dynamic groups can reduce administrative work and make access management more consistent when they are based on reliable identity attributes.
+**Assigned group**
+
+```text
+Administrator
+      ↓
+Manually adds user
+      ↓
+Group membership
+```
+
+**Dynamic group**
+
+```text
+User attribute
+      ↓
+Dynamic membership rule
+      ↓
+Microsoft Entra evaluates rule
+      ↓
+Automatic group membership
+```
+
+Dynamic groups can reduce administrative work and make identity management more consistent when reliable user attributes are available.
 
 ### Result
 
-After an external guest account was created, Entra processed the rule successfully and automatically added one guest to the `Guest Users` group.
+After creating a guest identity later in the exercise, Microsoft Entra automatically detected the account and placed it into the `Guest Users` group.
 
-The portal showed:
+The portal confirmed:
 
 - Membership type: **Dynamic**
 - Group type: **Security**
 - Direct users: **1**
 - Dynamic rules processing status: **Succeeded**
 
-![Dynamic guest users group](images/02-dynamic-guest-users.png)
+![Dynamic Guest Users group](Guest%20users.png)
+
+This confirmed that the dynamic membership rule was functioning correctly.
 
 ---
 
-## Task 3 — Create and add an external guest user
+# Task 3 — Invite an External Guest User
 
-The Microsoft exercise expected an existing external user to already be available. My tenant did not have one, so I created a real guest identity using an external Gmail account.
+The Microsoft lab expected an external user to already exist.
 
-The external identity was created as:
+My tenant contained only internal users, so when I initially attempted to add another member to `Project23`, only my six internal Microsoft 365 identities were available.
+
+![Project23 member picker before guest creation](Members%20of%20Project23.png)
+
+Instead of skipping the external-user portion of the exercise, I created a real Microsoft Entra B2B guest using an external Gmail account.
+
+### External identity
 
 **Display name:** `Artiom Pankrashkin2`  
 **User type:** `Guest`
 
-Microsoft Entra represents a B2B guest inside the tenant with an external-style user principal name containing `#EXT#`. The guest keeps their external identity but is represented as an object inside my tenant so that access can be assigned and controlled.
+I used:
 
-### Dynamic membership verification
+**Microsoft Entra ID → Users → New user → Invite external user**
 
-Because the new account had `User type = Guest`, it was automatically included in the `Guest Users` dynamic Security group without any manual membership action.
+The invitation configuration showed:
 
-This verified that the dynamic membership rule was working as intended.
+- External Gmail address
+- Send invite message: **Yes**
+- User type: **Guest**
 
-### Assigned membership in `Project23`
+![External user invitation](Invitation%20of%20external%20user.png)
 
-I then manually added the same guest account to `Project23`.
+Microsoft Entra represents an external B2B identity inside the tenant using an external-style user principal name containing:
 
-The final membership of `Project23` included:
+```text
+#EXT#
+```
 
-- Sophie Williams — internal tenant member
-- Artiom Pankrashkin2 — external guest
+The user continues to authenticate using their external identity while Microsoft Entra maintains a guest object inside my tenant.
 
-![Project23 members](images/03-project23-members.png)
+This object can then be used for:
 
-This gave me a useful comparison inside one lab:
+- Group membership
+- Application access
+- Collaboration
+- Access policies
+- Governance
+- Licensing where required
+
+---
+
+## Dynamic Membership Verification
+
+Because the newly created external account had:
+
+```text
+User type = Guest
+```
+
+Microsoft Entra automatically added it to the dynamic `Guest Users` Security group.
+
+I did not manually add the account to this group.
+
+This verified that my dynamic membership rule was working as intended.
+
+---
+
+# Task 4 — Add the Guest User to Project23
+
+I then manually added the external guest to the `Project23` Microsoft 365 group.
+
+The final membership included:
+
+| User | User Type | Membership |
+|---|---|---|
+| Sophie Williams | Member | Assigned |
+| Artiom Pankrashkin2 | Guest | Assigned |
+
+![Project23 members](Project23%20Members.png)
+
+This gave me a useful practical comparison between two different membership mechanisms.
 
 ```text
 Guest Users
-└── Guest added automatically by dynamic rule
+    │
+    └── Artiom Pankrashkin2
+        added automatically
+        through dynamic rule
+
 
 Project23
-└── Guest added manually by assigned membership
+    │
+    └── Artiom Pankrashkin2
+        added manually
+        through assigned membership
 ```
 
----
-
-## Task 4 — Group ownership
-
-The lab also covers group ownership. Group owners can manage parts of the group's lifecycle and membership without requiring broad tenant-wide administrative permissions.
-
-Microsoft also notes that when no explicit owner is selected during group creation, the tenant administrator creating the group can become the owner automatically.
-
-From an IAM perspective, ownership matters because groups should have clear accountability. In a production environment I would normally ensure that important groups have appropriate business or technical owners and avoid leaving groups orphaned.
+This distinction is important in IAM because group membership can be controlled either administratively or through identity attributes and automation.
 
 ---
 
-## Task 5 — Assign a license to a group
+# Task 5 — Configure Group Ownership
 
-The original Microsoft lab instructed me to assign **Microsoft Power Automate Free** to `Project23`.
+I also configured ownership for the `Project23` group.
 
-My tenant did not contain that product as a separate assignable subscription. The only available organization license shown in the Microsoft 365 admin center was **Microsoft 365 Business Premium**.
+My administrator account was already an owner, and I added **Michael Brown** as an additional owner.
 
-Rather than stop the lab, I adapted the exercise and used Microsoft 365 Business Premium to practice the same IAM concept: **group-based licensing**.
+### Final owners
 
-### Before the change
+- Artsiom Pankrashkin
+- Michael Brown
 
-The tenant showed:
+![Project23 owners](Project23%20owners.png)
 
-- Microsoft 365 Business Premium licenses purchased: **25**
-- Assigned: **6**
-- Available: **19**
+### Why Group Ownership Matters
 
-![License overview before assignment](images/04-license-overview-before.png)
+Group owners can manage aspects of a group's lifecycle and membership without necessarily requiring broad tenant-level administrative privileges.
 
-### License assignment
+From an IAM perspective, this supports the **principle of least privilege**.
 
-I assigned **Microsoft 365 Business Premium** to the `Project23` group from the Microsoft 365 admin center.
+Instead of giving someone a powerful administrative role simply to manage one group, ownership can delegate responsibility for that specific resource.
 
-The portal confirmed:
+Clear ownership also provides accountability.
 
-> Your licenses are being assigned
+For important production groups, I would normally want:
 
-After processing, the tenant showed **7 of 25 licenses assigned**.
+- A documented business purpose
+- At least one responsible business or technical owner
+- Preferably more than one owner for important groups
+- Periodic membership review
+- Periodic ownership review
 
-![Group-based license assignment](images/05-group-license-assignment.png)
+This reduces the risk of abandoned or unmanaged groups.
 
-### Verification from the guest account
+---
 
-The guest account showed membership in both:
+# Task 6 — Group-Based License Assignment
+
+The original Microsoft lab instructed me to assign:
+
+**Microsoft Power Automate Free**
+
+to `Project23`.
+
+However, my Microsoft 365 tenant did not have Microsoft Power Automate Free listed as a separate assignable subscription.
+
+The available organization subscription was:
+
+**Microsoft 365 Business Premium**
+
+Instead of stopping the lab, I adapted the exercise and used Microsoft 365 Business Premium to practice the same underlying IAM concept:
+
+> **Group-based licensing**
+
+---
+
+## License State Before Assignment
+
+Before assigning the license to `Project23`, my tenant contained:
+
+| License | Purchased | Assigned | Available |
+|---|---:|---:|---:|
+| Microsoft 365 Business Premium | 25 | 6 | 19 |
+
+![Microsoft 365 licenses before assignment](Licenses.png)
+
+---
+
+## Assigning Business Premium to Project23
+
+I assigned **Microsoft 365 Business Premium** directly to the `Project23` group.
+
+Microsoft 365 confirmed that the licenses were being assigned.
+
+After processing, the tenant showed:
+
+```text
+7 / 25 licenses assigned
+```
+
+![Project23 group license assignment](Licenses%20assigned.png)
+
+The assigned count increased from:
+
+```text
+6 → 7
+```
+
+One additional license was therefore consumed after the group-based assignment.
+
+Because Sophie Williams already had a Microsoft 365 Business Premium license, the new license assignment applied to the previously unlicensed eligible member.
+
+---
+
+# Task 7 — Verify the Result from the Guest User
+
+Rather than assuming that the configuration worked, I verified the result from the individual guest account.
+
+This is an important administrative practice because successful configuration should always be validated.
+
+---
+
+## Group Membership Verification
+
+The external account showed membership in both:
 
 - `Guest Users`
 - `Project23`
 
-![Guest group memberships](images/06-guest-memberships.png)
+![External user group memberships](External%20user%20group%20membership.png)
 
-The guest account also showed **Microsoft 365 Business Premium** under **Licenses and apps**, confirming that the group-based assignment had taken effect in my lab environment.
+These memberships were created in two different ways:
 
-![Guest license](images/07-guest-license.png)
+| Group | Membership method |
+|---|---|
+| Guest Users | Dynamic |
+| Project23 | Assigned |
 
-### What I learned from this
+This confirmed that the same identity could simultaneously participate in both policy-driven and manually assigned groups.
 
-Group-based licensing allows an administrator to connect licensing to group membership instead of manually licensing every user one at a time.
+---
 
-Conceptually:
+## License Verification
+
+I then checked:
+
+**Guest user → Licenses and apps**
+
+The account showed:
+
+**Microsoft 365 Business Premium**
+
+as assigned.
+
+![External user license confirmation](External%20user%20licence%20confirmation.png)
+
+This confirmed that the group-based licensing configuration had successfully propagated to the user.
+
+---
+
+# How Group-Based Licensing Works
+
+The basic process can be represented as:
 
 ```text
 User
   ↓
-Member of licensed group
+Member of group
   ↓
-Group has Microsoft 365 license assigned
+Group has Microsoft 365 license
   ↓
-License is inherited by eligible group members
+Microsoft Entra processes membership
+  ↓
+License assigned to eligible user
 ```
 
-This can make onboarding and license administration much easier at scale.
+Without group-based licensing, administrators may need to assign licenses individually:
 
-In a real production environment I would not automatically assign a full Business Premium license to every guest simply because they are external. Licensing should be based on actual business and service requirements. For this lab, the assignment was intentional so I could test and verify the group-based licensing process.
+```text
+Admin → User 1 → License
+Admin → User 2 → License
+Admin → User 3 → License
+Admin → User 4 → License
+```
 
----
+With group-based licensing:
 
-## Troubleshooting and adaptations
+```text
+               ┌── User 1
+Licensed Group ├── User 2
+               ├── User 3
+               └── User 4
+                     ↓
+              Licenses inherited
+```
 
-This lab was useful because the current tenant did not match the Microsoft instructions exactly.
-
-### 1. External user was not available
-
-The lab expected an `External User` to already exist. My tenant only contained internal users.
-
-**Solution:** I invited a real external Gmail identity as a Microsoft Entra B2B guest and then added it to `Project23`.
-
-### 2. Power Automate Free license was not available
-
-The Microsoft instructions referenced a `Microsoft Power Automate Free` license, but my Microsoft 365 admin center only displayed Microsoft 365 Business Premium.
-
-**Solution:** I used Microsoft 365 Business Premium to complete the same group-based licensing exercise.
-
-### 3. Microsoft admin interfaces differ from the lab screenshots
-
-The current Microsoft 365 and Entra admin center interfaces have changed compared with some of the training instructions.
-
-**Solution:** I located the equivalent current controls and completed the intended administrative tasks rather than relying only on the exact position of buttons shown in the training material.
-
-This was a useful reminder that real administration requires understanding the **goal of a configuration**, not just memorizing where a button is located.
+This becomes much more useful when managing dozens, hundreds, or thousands of identities.
 
 ---
 
-## IAM concepts demonstrated
+# Troubleshooting and Adaptations
 
-By completing the lab I practiced the following identity and access management concepts:
+One of the most useful aspects of this lab was that my real tenant did not perfectly match the Microsoft training instructions.
 
-- Microsoft Entra ID user and group administration
+That required troubleshooting rather than simply following screenshots.
+
+---
+
+## Issue 1 — External User Was Not Available
+
+When I first attempted to add another member to `Project23`, Microsoft Entra displayed only my six internal users.
+
+There was no existing external user.
+
+![Initial Project23 member selection](Members%20of%20Project23.png)
+
+### Solution
+
+I created a real B2B guest identity using an external Gmail account.
+
+After the guest object was created, I was able to add it to `Project23`.
+
+At the same time, the `Guest Users` dynamic group automatically detected it.
+
+---
+
+## Issue 2 — Microsoft Power Automate Free Was Not Available
+
+The Microsoft lab instructions referenced:
+
+```text
+Microsoft Power Automate Free
+```
+
+but my Microsoft 365 Admin Center only showed:
+
+```text
+Microsoft 365 Business Premium
+```
+
+![Available Microsoft 365 subscription](Licenses.png)
+
+### Solution
+
+I used Microsoft 365 Business Premium instead.
+
+The product was different, but the IAM learning objective remained the same:
+
+> Assign a license through group membership and verify that the license propagates to members.
+
+---
+
+## Issue 3 — Microsoft Admin Interfaces Differed from the Lab
+
+Some buttons, menus, and license-management screens in the current Microsoft 365 and Entra admin centers differed from the screenshots and instructions in the training material.
+
+### Solution
+
+Instead of relying on the exact location of buttons, I focused on understanding the intended administrative outcome and located the equivalent controls in the current interface.
+
+This reinforced an important lesson:
+
+> Real administration requires understanding what a configuration does, not simply memorizing where a button is located.
+
+---
+
+# IAM Concepts Demonstrated
+
+By completing this lab, I practiced the following identity and access management concepts:
+
+- Microsoft Entra ID administration
+- Microsoft 365 administration
 - Microsoft 365 groups
 - Security groups
 - Assigned group membership
 - Dynamic user membership
 - Attribute-based membership rules
-- B2B / external guest identities
-- Guest versus Member user types
+- B2B guest identities
+- External collaboration
+- Member vs Guest user types
 - Group ownership
+- Delegated group administration
+- Principle of least privilege
 - Group-based licensing
 - License verification
-- Basic identity lifecycle administration
+- Identity lifecycle administration
 - Administrative troubleshooting
 
 ---
 
-## Security and operational observations
+# Security and Operational Observations
 
-A few practical lessons stood out during the exercise:
+Several practical lessons stood out during this exercise.
 
-1. **Dynamic membership reduces manual administration.** If identity attributes are maintained correctly, access and group membership can follow those attributes automatically.
-2. **Guest identities still need governance.** External accounts should have a business reason, a defined owner, appropriate access, and eventually an expiration or review process.
-3. **Licensing should follow business need.** A technically possible license assignment is not automatically a good production design.
-4. **Groups are an important control point.** Membership can affect collaboration, application access, licensing, and later Conditional Access or other security policies.
-5. **Verification matters.** I checked the result from both the group view and the individual user view rather than assuming the configuration had succeeded.
+### 1. Dynamic membership reduces manual administration
+
+If identity attributes are accurate, Microsoft Entra can automatically determine membership rather than requiring administrators to continuously add and remove users manually.
 
 ---
 
-## Production improvements I would make
+### 2. Identity attributes become security-relevant
 
-If I were implementing this for a real organization rather than a training tenant, I would improve the design by:
+A dynamic rule depends on identity data.
 
-- Using a documented naming convention for groups.
+For example:
+
+```text
+userType = Guest
+```
+
+means that the accuracy of `userType` determines group membership.
+
+Poor identity data can therefore result in incorrect access.
+
+---
+
+### 3. Guest identities require governance
+
+External identities should not remain indefinitely simply because they were once invited.
+
+In a production environment I would want guest accounts to have:
+
+- A valid business reason
+- A responsible internal sponsor or owner
+- Appropriate permissions
+- Regular access reviews
+- Removal when no longer required
+
+---
+
+### 4. Groups are an important IAM control point
+
+Group membership can influence:
+
+- Application access
+- Microsoft 365 resources
+- Licensing
+- Collaboration
+- Security policies
+- Administrative delegation
+
+This makes proper group governance important.
+
+---
+
+### 5. Licensing should follow business requirements
+
+Although I intentionally assigned Business Premium through `Project23` for this exercise, I would not automatically license every external guest in a production environment.
+
+Licensing should be based on:
+
+- Required services
+- Job function
+- Access requirements
+- Cost
+- Organizational policy
+
+---
+
+### 6. Verification is essential
+
+I verified the configuration from multiple locations:
+
+```text
+Group inventory
+        ↓
+Dynamic group status
+        ↓
+Project23 membership
+        ↓
+Guest user memberships
+        ↓
+User licensing
+```
+
+This is more reliable than assuming that a configuration succeeded after pressing **Save** or **Assign**.
+
+---
+
+# Production Improvements
+
+If I were implementing this environment for a real organization, I would improve the design by:
+
+- Creating a documented group naming convention.
 - Separating collaboration groups from dedicated licensing groups where appropriate.
-- Assigning at least two responsible owners to important groups.
-- Periodically reviewing guest accounts and guest group memberships.
-- Removing licenses from guests unless the services genuinely require them.
-- Using access reviews or lifecycle processes for long-lived external identities.
-- Monitoring audit logs for membership, ownership, and licensing changes.
+- Assigning clear owners to important groups.
+- Avoiding excessive administrative privileges.
+- Reviewing guest identities periodically.
+- Reviewing external access regularly.
+- Removing unused guest accounts.
+- Assigning licenses based on actual business requirements.
+- Monitoring audit logs for membership changes.
+- Monitoring ownership changes.
+- Monitoring license changes.
+- Using access reviews for long-lived external identities.
+- Automating Joiner-Mover-Leaver processes where possible.
 
 ---
 
-## Final result
+# Final Result
 
-**Lab completed successfully.**
+## ✅ Lab Completed Successfully
 
-I created and managed both Microsoft 365 and Security groups, configured dynamic guest membership, created and managed a B2B guest identity, added the guest to an assigned Microsoft 365 group, reviewed group ownership, and successfully tested group-based Microsoft 365 Business Premium licensing.
+I successfully:
 
-The most valuable part of the exercise was seeing the difference between **manual identity administration** and **policy-driven identity administration** in a real Microsoft 365 tenant.
+- Created the `Project23` Microsoft 365 group.
+- Configured assigned membership.
+- Created a `Guest Users` Security group.
+- Configured dynamic user membership.
+- Built a rule based on `userType = Guest`.
+- Invited a real external B2B guest identity.
+- Verified automatic dynamic group membership.
+- Added the guest manually to `Project23`.
+- Added Michael Brown as a group owner.
+- Practiced delegated group ownership.
+- Assigned Microsoft 365 Business Premium through group membership.
+- Verified that the license propagated to the user.
+- Compared dynamic and assigned membership.
+- Troubleshot differences between the Microsoft training environment and my live tenant.
+
+The most valuable part of the exercise was seeing the difference between **manual identity administration** and **policy-driven identity administration** inside a real Microsoft 365 environment.
+
+Rather than only following a tutorial, I had to adapt the Microsoft exercise to my own tenant, troubleshoot missing resources, create a real external identity, and verify the final configuration from multiple administrative views.
 
 ---
 
-## Skills practiced
+## Skills Practiced
 
-`Microsoft Entra ID` · `Microsoft 365` · `IAM` · `Group Management` · `Dynamic Groups` · `B2B Guest Access` · `Group-Based Licensing` · `Identity Lifecycle` · `Microsoft 365 Administration`
+`Microsoft Entra ID` · `Microsoft 365` · `IAM` · `Identity Administration` · `Group Management` · `Dynamic Groups` · `Security Groups` · `Microsoft 365 Groups` · `B2B Guest Access` · `External Identities` · `Group Ownership` · `Group-Based Licensing` · `Identity Lifecycle` · `Microsoft 365 Administration` · `Troubleshooting`
