@@ -1,164 +1,62 @@
-# Microsoft-Security
+# Microsoft Security — Entra ID & Cloud Security Labs
 
-Hands-on Microsoft security portfolio covering **Identity & Access Management (IAM), Microsoft Entra ID, Conditional Access, MFA, Microsoft Defender, Purview, compliance, and cloud security**.
+**Identity administration · MFA · Conditional Access · Guest access · Password protection · Security controls**
 
-The repository documents practical configurations, testing, troubleshooting, security decisions, and results from my Microsoft security lab environment.
+Practical Microsoft Entra ID security configurations performed in a Microsoft 365 Business Premium educational tenant for the fictional organization **ExposedCybersecurity**.
 
----
+The portfolio documents real tenant administration in a lab context, with configuration screenshots, decision-making and test results. It does not imply production responsibility for a customer organization.
 
-## 🏆 Microsoft Applied Skills
+## Featured result — Microsoft Applied Skills
 
-### Microsoft Applied Skills: Get started with identities and access using Microsoft Entra
+**Get started with identities and access using Microsoft Entra**  
+Completed 3 September 2026 · **100% assessment result** (as recorded in the original lab documentation).
 
-**Status:** ✅ Passed  
-**Assessment score:** **100%**  
-**Required to pass:** 73%  
-**Completed:** September 3, 2026
+[View credential (PDF)](01-Identity-and-Access/Microsoft%20Applied%20Skills%20Entra.pdf) · [Complete Entra IAM lab series](01-Identity-and-Access/README.md)
 
-The assessment validated practical skills across:
+## Implemented IAM controls
 
-- User management
-- Group management
-- Password Protection
-- Self-Service Password Reset (SSPR)
-- Multifactor Authentication (MFA)
-- Conditional Access
-
-📄 **[View Microsoft Applied Skills Credential](./01-Identity-and-Access/Microsoft%20Applied%20Skills%20Entra.pdf)**
-
----
-
-# Portfolio
-
-## 01 — Identity & Access Management ✅
-
-**Microsoft Entra ID / Microsoft 365**
-
-Hands-on IAM environment built in a Microsoft 365 Business Premium tenant using the fictional organization:
-
-```text
-ExposedCybersecurity
-```
-
-### Completed labs
-
-| # | Lab | Main Skills |
+| Lab | Problem and control | Validation |
 |---|---|---|
-| 01 | [Basic Group Management](./01-Identity-and-Access/01-Basic-Group-Management/) | Groups, dynamic membership, guest users, ownership, group licensing |
-| 02 | [Basic Password Protection](./01-Identity-and-Access/02-Basic-Password-Protection/) | Smart Lockout, banned passwords, password security |
-| 03 | [Self-Service Password Reset](./01-Identity-and-Access/03-Self-Service-Password-Reset/) | SSPR, registration, recovery methods, notifications |
-| 04 | [Multifactor Authentication](./01-Identity-and-Access/04-Multifactor-Authentication/) | MFA, authentication methods, lockout, suspicious activity reporting |
-| 05 | [Conditional Access](./01-Identity-and-Access/05-Conditional-Access/) | Conditional Access, Report-only, What If analysis, application access control |
+| [01 · Group Management](01-Identity-and-Access/01-Basic-Group-Management/README.md) | Manual and dynamic groups, B2B guest invitation, ownership and group licensing | Dynamic guest membership processing and group assignment reviewed |
+| [02 · Password Protection](01-Identity-and-Access/02-Basic-Password-Protection/README.md) | Smart Lockout, weak-password restrictions and banned-password policy | Configured and documented in the Entra lab |
+| [03 · Self-Service Password Reset](01-Identity-and-Access/03-Self-Service-Password-Reset/README.md) | Recovery and registration settings for scoped users | SSPR configuration and notifications recorded |
+| [04 · MFA & Authentication Methods](01-Identity-and-Access/04-Multifactor-Authentication/README.md) | Legacy vs current MFA, app-password restriction, suspicious activity reporting | Tested training configuration, then restored legacy per-user MFA state |
+| [05 · Conditional Access](01-Identity-and-Access/05-Conditional-Access/README.md) | User- and app-scoped access restriction with safe rollout | **Report-only** policy and **What If** evaluation; live blocking was **not** enforced |
 
-➡️ **[View complete Identity & Access portfolio](./01-Identity-and-Access/)**
+### Conditional Access — evidence example
 
----
+![Microsoft Entra Conditional Access What If result showing policy applicability](01-Identity-and-Access/05-Conditional-Access/What%20if%20policies%20RUN.png)
 
-## Identity Security Architecture Practiced
+*The test showed that the specified policy would apply. It was not switched into enforcement mode.*
 
-```text
-Users & Groups
-      ↓
-Password Protection
-      ↓
-Self-Service Password Reset
-      ↓
-Multifactor Authentication
-      ↓
-Conditional Access
-      ↓
-Policy-Based Identity Security
+## Lab architecture and control sequence
+
+```mermaid
+flowchart LR
+    USERS["Internal + guest identities"] --> GROUPS["Assigned / dynamic groups"]
+    GROUPS --> AUTH["Password and MFA controls"]
+    AUTH --> ACCESS["Conditional Access / app access"]
+    ACCESS --> LOGS["Audit and test evidence"]
 ```
 
-The labs progressed from basic identity administration toward modern policy-based access control.
+This illustrates the progression of implemented lab topics, **not** a complete enterprise architecture or an automated end-to-end identity lifecycle.
 
----
+## Notable technical decisions
 
-## Key Technologies
+- Used a fictional company instead of reproducing Contoso without adaptation.
+- Evaluated modern Authentication Methods settings when older training material referred to legacy MFA controls.
+- Avoided Security Questions in the recovery design.
+- Left Trusted IP MFA bypass disabled.
+- Practised Conditional Access in **Report-only** before enforcing any rule.
+- Excluded the admin test account from the narrowly scoped example policy while reviewing lockout risk.
+- Documented what was configured, what was simulated and what remains for subsequent work.
 
-`Microsoft Entra ID` · `Microsoft 365` · `IAM` · `Identity Administration` · `Dynamic Groups` · `B2B Guest Access` · `Smart Lockout` · `SSPR` · `MFA` · `Authentication Methods` · `Conditional Access` · `What If Analysis` · `Zero Trust` · `Microsoft 365 Security`
+## Next engineering work
 
----
+Identity lifecycle automation, advanced Conditional Access, PIM, access reviews, federated applications, Microsoft Graph scripting, Microsoft Defender and Purview are **planned**, not represented as completed work here.
 
-## Modern Security Approach
+## Related work
 
-Some Microsoft training exercises referenced older or legacy configuration paths.
+[TryHackMe Microsoft Entra learning series](https://github.com/artiomcyber/TryHackMe/tree/main/MS-Entra-ID) · [GRC projects](https://github.com/artiomcyber/grc-projects) · [Forage security simulations](https://github.com/artiomcyber/forage-cybersecurity-projects) · [GitHub profile](https://github.com/artiomcyber)
 
-Where appropriate, I compared the original lab instructions with the current Microsoft Entra implementation and documented the modern approach.
-
-Examples include:
-
-- Centralized **Authentication Methods Policy**
-- Avoiding retiring Security Questions
-- Disabling legacy app passwords
-- Using **Report suspicious activity**
-- Moving away from legacy per-user MFA
-- Preparing MFA enforcement through **Conditional Access**
-- Testing Conditional Access policies in **Report-only**
-- Using **What If** analysis before enforcement
-
-The objective was not only to complete each exercise, but also to understand how the controls should be implemented in a current Microsoft environment.
-
----
-
-# Security Portfolio Roadmap
-
-This repository will continue to expand into:
-
-### Identity & Access
-✅ Microsoft Entra ID  
-✅ MFA  
-✅ SSPR  
-✅ Conditional Access  
-✅ Group and guest identity management  
-
-### Microsoft Defender
-🔄 Defender XDR  
-🔄 Defender for Endpoint  
-🔄 Defender for Cloud Apps  
-🔄 Incident investigation and response  
-
-### Microsoft Purview & Compliance
-🔄 Data Loss Prevention  
-🔄 Information Protection  
-🔄 Sensitivity labels  
-🔄 Retention and compliance controls  
-
-### Cloud Security
-🔄 Microsoft Defender for Cloud  
-🔄 Azure security controls  
-🔄 Identity and workload protection  
-
----
-
-## Lab Philosophy
-
-For each exercise I aim to document:
-
-```text
-Requirement
-    ↓
-Configuration
-    ↓
-Security reasoning
-    ↓
-Testing
-    ↓
-Troubleshooting
-    ↓
-Verification
-    ↓
-Evidence
-```
-
-This repository is intended to demonstrate practical Microsoft security and IAM skills rather than only certification study.
-
----
-
-## Current Achievement
-
-> **Microsoft Applied Skills — Get started with identities and access using Microsoft Entra**
->
-> **100% assessment score — September 2026**
-
-The next stages of this portfolio will expand from **identity security** into Microsoft Defender, cloud security, governance, and compliance.
+For configuration details and all lab screenshots, use the [Entra IAM index](01-Identity-and-Access/README.md).
